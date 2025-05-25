@@ -9,18 +9,19 @@ const path = require("path");
 const fs = require("fs");
 const bodyParse = require("body-parser");
 const connectDB = require("./Config/db");
-const mongoSanitize = require("express-mongo-sanitize"); // ✅ ป้องกัน NoSQL Injection
+const mongoSanitize = require("express-mongo-sanitize");
 const cookieParser = require("cookie-parser");
 const csrf = require("csurf");
 
 const app = express();
 connectDB();
 
-// ✅ Helmet + CSP (สำหรับ reCAPTCHA)
+// ✅ Helmet + CSP (เน้นความปลอดภัย)
 app.use(helmet());
 app.use(helmet.xssFilter());
 app.use(helmet.noSniff());
 app.use(helmet.frameguard({ action: "deny" }));
+
 app.use(
   helmet.contentSecurityPolicy({
     useDefaults: true,
@@ -30,12 +31,12 @@ app.use(
         "'self'",
         "https://www.google.com",
         "https://www.gstatic.com",
-        "'unsafe-inline'"
+        "'unsafe-inline'",
       ],
       "style-src": [
         "'self'",
         "https://fonts.googleapis.com",
-        "'unsafe-inline'"
+        "'unsafe-inline'",
       ],
       "font-src": ["'self'", "https://fonts.gstatic.com"],
       "frame-src": ["https://www.google.com", "https://www.recaptcha.net"],
@@ -44,7 +45,7 @@ app.use(
         "'self'",
         "https://www.google.com",
         "https://www.gstatic.com",
-        ...(process.env.CLIENT_URL || "").split(",").map((url) => url.trim())
+        ...(process.env.CLIENT_URL || "").split(",").map((url) => url.trim()),
       ],
       "object-src": ["'none'"],
       "base-uri": ["'self'"],
@@ -56,6 +57,9 @@ app.use(
 const allowedOrigins = (process.env.CLIENT_URL || "")
   .split(",")
   .map((url) => url.trim());
+
+// ✅ เพิ่ม preflight OPTIONS สำหรับทุก route (สำคัญ)
+app.options("*", cors());
 
 app.use(
   cors({
@@ -70,13 +74,13 @@ app.use(
   })
 );
 
-// ✅ โหลดไฟล์รูปข้าม origin ได้
+// ✅ ไฟล์ภาพโหลดข้าม origin ได้
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
 });
 
-// ✅ Rate Limit
+// ✅ Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 1000,
@@ -88,15 +92,13 @@ app.use("/api", limiter);
 app.use(morgan("dev"));
 app.use(bodyParse.json({ limit: "10mb" }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use(mongoSanitize()); // ✅ ป้องกัน NoSQL Injection
-
-// ✅ ตั้งค่า cookie-parser สำหรับการจัดการ Cookies
+app.use(mongoSanitize());
 app.use(cookieParser());
 
-// ✅ ตั้งค่า CSRF protection middleware
+// ✅ CSRF
 const csrfProtection = csrf({ cookie: true });
 
-// ✅ Route สำหรับฟอร์มที่มี CSRF Token
+// ✅ ฟอร์มทดสอบ CSRF
 app.get("/form", csrfProtection, (req, res) => {
   res.send(`
     <form action="/submit" method="POST">
@@ -106,19 +108,18 @@ app.get("/form", csrfProtection, (req, res) => {
   `);
 });
 
-// ✅ Route สำหรับรับคำขอจากฟอร์ม
 app.post("/submit", csrfProtection, (req, res) => {
   res.send("Form submitted successfully!");
 });
 
-// ✅ Load routes อย่างปลอดภัย
+// ✅ Load ทุก route จากโฟลเดอร์ Routes/
 const routePath = path.join(__dirname, "Routes");
 fs.readdirSync(routePath).forEach((file) => {
   const route = require(path.join(routePath, file));
   if (typeof route === "function") {
     app.use("/api", route);
   } else {
-    console.warn(`⚠️  Route "${file}" ไม่ใช่ middleware function (router). ข้ามไฟล์นี้ไป`);
+    console.warn(`⚠️ Route "${file}" ไม่ใช่ middleware function`);
   }
 });
 
