@@ -24,20 +24,7 @@ server/*.mongodb
 server/*.bson
 server/*.dump
 
-# ====================================
-# 🌐 CLIENT (React)
-# ====================================
-client/node_modules/
-client/build/
-client/.env
-client/.vscode/
-client/coverage/
-client/npm-debug.log*
-client/yarn-debug.log*
-client/yarn-error.log*
-client/.DS_Store
-client/test-output/
-client/junit.xml
+
 
 # ====================================
 # 📦 ROOT DEPENDENCIES
