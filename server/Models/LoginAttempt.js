@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
 const loginAttemptSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  count: { type: Number, default: 0 },
-  lastAttempt: { type: Date, default: Date.now },
+  ip: { type: String, required: true, unique: true }, // ติดตามตาม IP
+  count: { type: Number, default: 0 }, // จำนวนการพยายามเข้าสู่ระบบที่ผิดพลาด
+  lastAttempt: { type: Date, default: Date.now }, // เวลาของการพยายามเข้าสู่ระบบครั้งล่าสุด
 });
 
 module.exports = mongoose.models.LoginAttempt || mongoose.model("LoginAttempt", loginAttemptSchema);
