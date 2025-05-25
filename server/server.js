@@ -1,4 +1,4 @@
-require("dotenv").config(); // <<< สำคัญที่สุด!
+require("dotenv").config();
 
 const express = require("express");
 const helmet = require("helmet");
@@ -16,50 +16,47 @@ const csrf = require("csurf");
 const app = express();
 connectDB();
 
-// ✅ Helmet + CSP (เน้นความปลอดภัย)
+// ✅ Helmet v6+ ใช้แบบนี้
 app.use(helmet());
-app.use(helmet.xssFilter());
-app.use(helmet.noSniff());
-app.use(helmet.frameguard({ action: "deny" }));
 
+// ✅ Content Security Policy (CSP)
 app.use(
   helmet.contentSecurityPolicy({
-    useDefaults: true,
     directives: {
-      "default-src": ["'self'"],
-      "script-src": [
+      defaultSrc: ["'self'"],
+      scriptSrc: [
         "'self'",
         "https://www.google.com",
         "https://www.gstatic.com",
         "'unsafe-inline'",
       ],
-      "style-src": [
+      styleSrc: [
         "'self'",
         "https://fonts.googleapis.com",
         "'unsafe-inline'",
       ],
-      "font-src": ["'self'", "https://fonts.gstatic.com"],
-      "frame-src": ["https://www.google.com", "https://www.recaptcha.net"],
-      "img-src": ["'self'", "data:", "blob:"],
-      "connect-src": [
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      frameSrc: ["https://www.google.com", "https://www.recaptcha.net"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      connectSrc: [
         "'self'",
         "https://www.google.com",
         "https://www.gstatic.com",
         ...(process.env.CLIENT_URL || "").split(",").map((url) => url.trim()),
       ],
-      "object-src": ["'none'"],
-      "base-uri": ["'self'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
     },
   })
 );
 
-// ✅ CORS รองรับหลายโดเมนจาก .env
+// ✅ CORS หลายโดเมน
 const allowedOrigins = (process.env.CLIENT_URL || "")
   .split(",")
-  .map((url) => url.trim());
+  .map((url) => url.trim())
+  .filter(Boolean);
 
-// ✅ เพิ่ม preflight OPTIONS สำหรับทุก route (สำคัญ)
-app.options("*", cors());
+app.options("*", cors()); // Preflight
 
 app.use(
   cors({
@@ -67,6 +64,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.warn("⛔ Blocked CORS Origin:", origin);
         callback(new Error("⛔ CORS Blocked: " + origin));
       }
     },
@@ -74,7 +72,7 @@ app.use(
   })
 );
 
-// ✅ ไฟล์ภาพโหลดข้าม origin ได้
+// ✅ โหลดไฟล์ภาพข้าม origin
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
@@ -112,7 +110,7 @@ app.post("/submit", csrfProtection, (req, res) => {
   res.send("Form submitted successfully!");
 });
 
-// ✅ Load ทุก route จากโฟลเดอร์ Routes/
+// ✅ Load ทุก route
 const routePath = path.join(__dirname, "Routes");
 fs.readdirSync(routePath).forEach((file) => {
   const route = require(path.join(routePath, file));
