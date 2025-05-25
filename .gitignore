@@ -1,0 +1,109 @@
+# ====================================
+# 🔐 GENERAL
+# ====================================
+# 🛡️ Ignore all .env files everywhere
+.env
+*/.env
+
+*.log
+.DS_Store
+Thumbs.db
+
+# ====================================
+# 🖥️ NODE SERVER (Express.js)
+# ====================================
+server/node_modules/
+server/uploads/
+server/uploads/.DS_Store
+server/.env
+server/npm-debug.log*
+server/.DS_Store
+server/.vscode/
+server/*.log
+server/*.mongodb
+server/*.bson
+server/*.dump
+
+# ====================================
+# 🌐 CLIENT (React)
+# ====================================
+client/node_modules/
+client/build/
+client/.env
+client/.vscode/
+client/coverage/
+client/npm-debug.log*
+client/yarn-debug.log*
+client/yarn-error.log*
+client/.DS_Store
+client/test-output/
+client/junit.xml
+
+# ====================================
+# 📦 ROOT DEPENDENCIES
+# ====================================
+node_modules/
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+
+# ====================================
+# ⚙️ IDE/OS
+# ====================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+
+# ====================================
+# 🔒 SECRETS & KEYS
+# ====================================
+*.pem
+*.key
+*.crt
+*.pfx
+server/private.key
+server/public.key
+server/jwtRS256.key*
+server/*.pem
+
+# ====================================
+# 📦 BUILD OUTPUT
+# ====================================
+client/build/*
+server/dist/
+
+# ====================================
+# 🧪 TEST & COVERAGE
+# ====================================
+*.test.js
+*.spec.js
+*.test.ts
+*.spec.ts
+coverage/
+jest-html-reporters-*.html
+
+# ====================================
+# 🐳 DOCKER
+# ====================================
+*.pid
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# ====================================
+# ⚙️ MONOREPO TOOLS
+# ====================================
+turbo/
+nx.json
+
+
+# ====================================
+# 🚀 VERCEL
+# ====================================
+.vercel/
+.vercel/project.json
+
+.env.*

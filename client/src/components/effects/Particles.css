@@ -1,0 +1,11 @@
+/* ✅ Particles.css */
+.particles-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;    /* ✅ เต็มจอแนวนอน */
+  height: 100vh;   /* ✅ เต็มจอแนวตั้ง */
+  z-index: 0;      /* ✅ อยู่ล่าง content */
+  pointer-events: none; /* ✅ คลิกทะลุได้ */
+  overflow: hidden;
+}

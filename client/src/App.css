@@ -1,0 +1,63 @@
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap");
+
+/* ✅ เซตพื้นฐานให้ไม่มีช่องว่างรอบขอบจอ */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ✅ ฟอนต์และ layout ทั่วไป */
+body, html, #root {
+  height: 100%;
+  width: 100%;
+  font-family: 'Prompt', sans-serif;
+  background-color: #000; /* ✅ สีพื้นหลังดำสนิท */
+  color: #fff;
+  overflow-x: hidden;
+}
+
+
+/* ✅ Centered layout ตัวอย่างสำหรับ content */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* ✅ Optional: smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ✅ ปรับรูปภาพไม่ให้เกินจอ */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ✅ ปรับลิงก์ */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ✅ Button reset */
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ✅ Scrollbar hidden (optional) */
+/* ::-webkit-scrollbar {
+  display: none;
+} */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+
+
+

@@ -1,0 +1,36 @@
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap");
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto; /* ✅ ให้ scroll ได้ */
+  font-family: 'Prompt', sans-serif;
+
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Sticky fix for AppBar */
+.MuiToolbar-root {
+  min-height: 64px !important;
+}
+
+/* Scrollbar (optional) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #ddd;
+}
+::-webkit-scrollbar-thumb {
+  background: #aaa;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
