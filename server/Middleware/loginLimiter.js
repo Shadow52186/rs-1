@@ -1,6 +1,6 @@
 const rateLimit = require("express-rate-limit");
-const LoginAttempt = require('../Models/LoginAttempt')
-const BannedIP = require("../models/BannedIP"); // ใช้เพื่อติดตาม IP ที่ถูกแบน
+const LoginAttempt = require('../Models/LoginAttempt');
+const BannedIP = require("../Models/BannedIP");
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 นาที
