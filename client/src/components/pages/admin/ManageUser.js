@@ -26,6 +26,26 @@ import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
 
+// ✅ ใช้ backend URL ตามสภาพแวดล้อม (Vercel/Render/Local)
+const BASE_URL = (() => {
+  const host = window.location.hostname;
+  const productionDomains = [
+    "rs-1-wgb9.vercel.app",
+    "rs-1-shop-shadow52186s-projects.vercel.app",
+    "rs-1-shop-5z0gmr152-shadow52186s-projects.vercel.app",
+  ];
+
+  if (host === "localhost") {
+    return "http://localhost:5000/api";
+  }
+
+  if (productionDomains.includes(host)) {
+    return "https://rs-shop-backend.onrender.com/api";
+  }
+
+  return "http://localhost:5000/api"; // fallback
+})();
+
 const ManageUser = () => {
   const [users, setUsers] = useState([]);
   const [editing, setEditing] = useState(null);
@@ -35,19 +55,27 @@ const ManageUser = () => {
   const theme = useTheme();
 
   const loadUsers = async () => {
-    const token = localStorage.getItem("token");
-    const res = await axios.get(`${process.env.REACT_APP_API}/users`, {
-      headers: { Authorization: "Bearer " + token },
-    });
-    setUsers(res.data);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${BASE_URL}/users`, {
+        headers: { Authorization: "Bearer " + token },
+      });
+      setUsers(res.data);
+    } catch (err) {
+      console.error("loadUsers error:", err);
+    }
   };
 
   const loadBannedIps = async () => {
-    const token = localStorage.getItem("token");
-    const res = await axios.get(`${process.env.REACT_APP_API}/login/blocked`, {
-      headers: { Authorization: "Bearer " + token },
-    });
-    setBannedIps(res.data);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${BASE_URL}/banned-ips`, {
+        headers: { Authorization: "Bearer " + token },
+      });
+      setBannedIps(res.data);
+    } catch (err) {
+      console.error("loadBannedIps error:", err);
+    }
   };
 
   useEffect(() => {
@@ -67,7 +95,7 @@ const ManageUser = () => {
   const handleUpdate = async () => {
     const token = localStorage.getItem("token");
     try {
-      await axios.put(`${process.env.REACT_APP_API}/user/${editing}`, form, {
+      await axios.put(`${BASE_URL}/user/${editing}`, form, {
         headers: { Authorization: "Bearer " + token },
       });
       Swal.fire("✅ สำเร็จ", "อัปเดตผู้ใช้เรียบร้อย", "success");
@@ -89,7 +117,7 @@ const ManageUser = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         const token = localStorage.getItem("token");
-        await axios.delete(`${process.env.REACT_APP_API}/user/${id}`, {
+        await axios.delete(`${BASE_URL}/user/${id}`, {
           headers: { Authorization: "Bearer " + token },
         });
         Swal.fire("ลบแล้ว!", "ผู้ใช้ถูกลบแล้ว", "success");
@@ -115,21 +143,12 @@ const ManageUser = () => {
 
         {isMobile ? (
           users.map((u) => (
-            <Card
-              key={u._id}
-              sx={{ mb: 2, p: 2, border: "1px solid #ddd", borderRadius: 2 }}
-            >
+            <Card key={u._id} sx={{ mb: 2, p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
               <Stack spacing={1}>
                 <Typography>
                   <strong>ชื่อผู้ใช้:</strong>{" "}
                   {editing === u._id ? (
-                    <TextField
-                      name="username"
-                      value={form.username}
-                      onChange={handleChange}
-                      size="small"
-                      fullWidth
-                    />
+                    <TextField name="username" value={form.username} onChange={handleChange} size="small" fullWidth />
                   ) : (
                     u.username
                   )}
@@ -137,14 +156,7 @@ const ManageUser = () => {
                 <Typography>
                   <strong>รหัสผ่าน:</strong>{" "}
                   {editing === u._id ? (
-                    <TextField
-                      name="password"
-                      value={form.password}
-                      onChange={handleChange}
-                      type="password"
-                      size="small"
-                      fullWidth
-                    />
+                    <TextField name="password" value={form.password} onChange={handleChange} type="password" size="small" fullWidth />
                   ) : (
                     "••••••••"
                   )}
@@ -152,13 +164,7 @@ const ManageUser = () => {
                 <Typography>
                   <strong>สิทธิ์:</strong>{" "}
                   {editing === u._id ? (
-                    <Select
-                      name="role"
-                      value={form.role}
-                      onChange={handleChange}
-                      size="small"
-                      fullWidth
-                    >
+                    <Select name="role" value={form.role} onChange={handleChange} size="small" fullWidth>
                       <MenuItem value="admin">admin</MenuItem>
                       <MenuItem value="user">user</MenuItem>
                     </Select>
@@ -169,14 +175,7 @@ const ManageUser = () => {
                 <Typography>
                   <strong>Point:</strong>{" "}
                   {editing === u._id ? (
-                    <TextField
-                      name="point"
-                      value={form.point}
-                      onChange={handleChange}
-                      type="number"
-                      size="small"
-                      fullWidth
-                    />
+                    <TextField name="point" value={form.point} onChange={handleChange} type="number" size="small" fullWidth />
                   ) : (
                     u.point
                   )}
@@ -184,45 +183,19 @@ const ManageUser = () => {
                 <Stack direction="row" spacing={1}>
                   {editing === u._id ? (
                     <>
-                      <Button
-                        variant="contained"
-                        color="success"
-                        onClick={handleUpdate}
-                        startIcon={<SaveIcon />}
-                        size="small"
-                        fullWidth
-                      >
+                      <Button variant="contained" color="success" onClick={handleUpdate} startIcon={<SaveIcon />} size="small" fullWidth>
                         บันทึก
                       </Button>
-                      <Button
-                        variant="outlined"
-                        onClick={() => setEditing(null)}
-                        startIcon={<CloseIcon />}
-                        size="small"
-                        fullWidth
-                      >
+                      <Button variant="outlined" onClick={() => setEditing(null)} startIcon={<CloseIcon />} size="small" fullWidth>
                         ยกเลิก
                       </Button>
                     </>
                   ) : (
                     <>
-                      <Button
-                        variant="outlined"
-                        onClick={() => handleEdit(u)}
-                        startIcon={<EditIcon />}
-                        size="small"
-                        fullWidth
-                      >
+                      <Button variant="outlined" onClick={() => handleEdit(u)} startIcon={<EditIcon />} size="small" fullWidth>
                         แก้ไข
                       </Button>
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        onClick={() => handleDelete(u._id)}
-                        startIcon={<DeleteIcon />}
-                        size="small"
-                        fullWidth
-                      >
+                      <Button variant="outlined" color="error" onClick={() => handleDelete(u._id)} startIcon={<DeleteIcon />} size="small" fullWidth>
                         ลบ
                       </Button>
                     </>
@@ -247,40 +220,21 @@ const ManageUser = () => {
                 <TableRow key={u._id}>
                   <TableCell>
                     {editing === u._id ? (
-                      <TextField
-                        name="username"
-                        value={form.username}
-                        onChange={handleChange}
-                        size="small"
-                        fullWidth
-                      />
+                      <TextField name="username" value={form.username} onChange={handleChange} size="small" fullWidth />
                     ) : (
                       u.username
                     )}
                   </TableCell>
                   <TableCell>
                     {editing === u._id ? (
-                      <TextField
-                        name="password"
-                        value={form.password}
-                        onChange={handleChange}
-                        type="password"
-                        size="small"
-                        fullWidth
-                      />
+                      <TextField name="password" value={form.password} onChange={handleChange} type="password" size="small" fullWidth />
                     ) : (
                       "••••••••"
                     )}
                   </TableCell>
                   <TableCell>
                     {editing === u._id ? (
-                      <Select
-                        name="role"
-                        value={form.role}
-                        onChange={handleChange}
-                        size="small"
-                        fullWidth
-                      >
+                      <Select name="role" value={form.role} onChange={handleChange} size="small" fullWidth>
                         <MenuItem value="admin">admin</MenuItem>
                         <MenuItem value="user">user</MenuItem>
                       </Select>
@@ -290,14 +244,7 @@ const ManageUser = () => {
                   </TableCell>
                   <TableCell>
                     {editing === u._id ? (
-                      <TextField
-                        name="point"
-                        value={form.point}
-                        onChange={handleChange}
-                        type="number"
-                        size="small"
-                        fullWidth
-                      />
+                      <TextField name="point" value={form.point} onChange={handleChange} type="number" size="small" fullWidth />
                     ) : (
                       u.point
                     )}
@@ -306,41 +253,19 @@ const ManageUser = () => {
                     <Stack direction="row" spacing={1} justifyContent="center">
                       {editing === u._id ? (
                         <>
-                          <Button
-                            onClick={handleUpdate}
-                            variant="contained"
-                            color="success"
-                            startIcon={<SaveIcon />}
-                            size="small"
-                          >
+                          <Button onClick={handleUpdate} variant="contained" color="success" startIcon={<SaveIcon />} size="small">
                             บันทึก
                           </Button>
-                          <Button
-                            onClick={() => setEditing(null)}
-                            variant="outlined"
-                            startIcon={<CloseIcon />}
-                            size="small"
-                          >
+                          <Button onClick={() => setEditing(null)} variant="outlined" startIcon={<CloseIcon />} size="small">
                             ยกเลิก
                           </Button>
                         </>
                       ) : (
                         <>
-                          <Button
-                            onClick={() => handleEdit(u)}
-                            variant="outlined"
-                            startIcon={<EditIcon />}
-                            size="small"
-                          >
+                          <Button onClick={() => handleEdit(u)} variant="outlined" startIcon={<EditIcon />} size="small">
                             แก้ไข
                           </Button>
-                          <Button
-                            onClick={() => handleDelete(u._id)}
-                            variant="outlined"
-                            color="error"
-                            startIcon={<DeleteIcon />}
-                            size="small"
-                          >
+                          <Button onClick={() => handleDelete(u._id)} variant="outlined" color="error" startIcon={<DeleteIcon />} size="small">
                             ลบ
                           </Button>
                         </>
@@ -354,9 +279,7 @@ const ManageUser = () => {
         )}
 
         <Box mt={5}>
-          <Typography variant="h5" fontWeight="bold" gutterBottom>
-            🚫 IP ที่ถูกแบน (มากกว่า 25 ครั้ง)
-          </Typography>
+          <Typography variant="h5" fontWeight="bold" gutterBottom>🚫 IP ที่ถูกแบน (มากกว่า 25 ครั้ง)</Typography>
           <Divider sx={{ mb: 2 }} />
           <Table size="small">
             <TableHead>
