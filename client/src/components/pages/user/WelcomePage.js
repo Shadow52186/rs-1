@@ -78,7 +78,7 @@ const WelcomePage = () => {
               width: "200px",
               marginBottom: "24px",
               borderRadius: "12px",
-              filter: "drop-shadow(0 0 25px #a855f7) drop-shadow(0 0 45px #c084fc)",
+              filter: "drop-shadow(0 0 15px #a855f7) drop-shadow(0 0 25px #c084fc)",
             }}
           />
         </AnimatedContent>
