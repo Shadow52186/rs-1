@@ -1,7 +1,7 @@
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { jwtDecode } from "jwt-decode"; // แก้ไขตรงนี้
+import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
 import { login } from "./store/userSlice";
 import { CssBaseline } from "@mui/material";
@@ -24,6 +24,7 @@ import PromotionPage from "./components/pages/user/PromotionPage";
 import TopupHistoryPage from "./components/pages/user/TopupHistoryPage";
 import TopupPage from "./components/pages/user/TopupPage";
 import PurchaseHistoryPage from "./components/pages/user/PurchaseHistoryPage";
+import WelcomePage from "./components/pages/user/WelcomePage"; // ✅ เพิ่มตรงนี้
 
 // Auth Pages
 import Register from "./components/pages/auth/Register";
@@ -45,7 +46,7 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      const decoded = jwtDecode(token); // ใช้ jwtDecode ตามปกติ
+      const decoded = jwtDecode(token);
       dispatch(login(decoded));
     }
     setLoading(false);
@@ -57,13 +58,17 @@ function App() {
     <Router>
       <CssBaseline />
       <Routes>
-        {/* ✅ Public */}
-        <Route path="/" element={<Navigate to="/user/index" replace />} /> {/* Redirect ไปที่ /user/index */}
+        {/* ✅ หน้าแรก = WelcomePage */}
+        <Route path="/" element={<WelcomePage />} />
+
+        {/* ✅ Auth */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="*" element={<NotFound404 />} /> {/* หน้าผิดพลาด */}
 
-        {/* ✅ User Pages ครอบด้วย Navbar + Footer */}
+        {/* ✅ หน้าผิดพลาด */}
+        <Route path="*" element={<NotFound404 />} />
+
+        {/* ✅ หน้า User มี Navbar + Footer */}
         <Route
           path="/user/*"
           element={
