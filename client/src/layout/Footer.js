@@ -269,7 +269,7 @@ const Footer = () => {
 
     <IconButton
       component="a"
-      href="https://discord.gg/yourinvite"
+      href="https://discord.gg/"
       target="_blank"
       sx={{
         color: "#a78bfa",
