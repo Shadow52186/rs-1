@@ -32,6 +32,8 @@ const BASE_URL = (() => {
     "rs-1-wgb9.vercel.app",
     "rs-1-shop-shadow52186s-projects.vercel.app",
     "rs-1-shop-5z0gmr152-shadow52186s-projects.vercel.app",
+    "rs-shop.site",
+    "www.rs-shop.site",
   ];
 
   if (host === "localhost") {
