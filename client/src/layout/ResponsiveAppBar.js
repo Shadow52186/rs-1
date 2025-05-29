@@ -16,7 +16,6 @@ import {
   ListItemText,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import HomeIcon from "@mui/icons-material/Home";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -181,9 +180,7 @@ function ResponsiveAppBar() {
 
             {/* Right Side */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <IconButton sx={{ color: "#fff" }}>
-                <SearchIcon />
-              </IconButton>
+              
               <IconButton
                 onClick={toggleDrawer(true)}
                 sx={{ display: { xs: "flex", xl: "none" }, color: "white" }}

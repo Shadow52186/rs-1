@@ -26,7 +26,6 @@ import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
 
-// ✅ ใช้ backend URL ตามสภาพแวดล้อม (Vercel/Render/Local)
 const BASE_URL = (() => {
   const host = window.location.hostname;
   const productionDomains = [
@@ -51,6 +50,7 @@ const ManageUser = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
   const [bannedIps, setBannedIps] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const isMobile = useMediaQuery("(max-width:768px)");
   const theme = useTheme();
 
@@ -126,6 +126,10 @@ const ManageUser = () => {
     });
   };
 
+  const filteredUsers = users.filter((u) =>
+    u.username.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
       <Paper
@@ -141,8 +145,18 @@ const ManageUser = () => {
         </Typography>
         <Divider sx={{ mb: 3 }} />
 
+        <TextField
+          label="🔍 ค้นหาชื่อผู้ใช้"
+          variant="outlined"
+          fullWidth
+          size="small"
+          sx={{ mb: 3 }}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+
         {isMobile ? (
-          users.map((u) => (
+          filteredUsers.map((u) => (
             <Card key={u._id} sx={{ mb: 2, p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
               <Stack spacing={1}>
                 <Typography>
@@ -216,7 +230,7 @@ const ManageUser = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map((u) => (
+              {filteredUsers.map((u) => (
                 <TableRow key={u._id}>
                   <TableCell>
                     {editing === u._id ? (

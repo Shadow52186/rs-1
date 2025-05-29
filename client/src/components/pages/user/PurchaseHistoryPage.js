@@ -18,6 +18,7 @@ import { motion } from "framer-motion";
 
 const PurchaseHistoryPage = () => {
   const [history, setHistory] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); // ✅ ช่องค้นหา
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -57,6 +58,11 @@ const PurchaseHistoryPage = () => {
       }
     });
   };
+
+  // ✅ กรองประวัติจากคำค้นหา
+  const filteredHistory = history.filter((item) =>
+    item.product?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Box sx={{ position: "relative", minHeight: "100vh", overflow: "hidden" }}>
@@ -104,15 +110,43 @@ const PurchaseHistoryPage = () => {
           align="center"
           sx={{
             color: "#fff",
-            mb: 6,
+            mb: 4,
             textShadow: "0 0 10px #a855f7, 0 0 20px #9333ea",
           }}
         >
           📜 ประวัติการซื้อสินค้า
         </Typography>
 
+        {/* ✅ ช่องค้นหา */}
+        <Box
+          sx={{
+            maxWidth: "400px",
+            mx: "auto",
+            mb: 5,
+          }}
+        >
+          <input
+            type="text"
+            placeholder="🔍 ค้นหาชื่อสินค้า..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              fontSize: "16px",
+              borderRadius: "12px",
+              border: "none",
+              outline: "none",
+              background: "rgba(255, 255, 255, 0.08)",
+              color: "#fff",
+              boxShadow: "0 0 12px rgba(168, 85, 247, 0.2)",
+            }}
+          />
+        </Box>
+
+        {/* ✅ รายการประวัติ */}
         <Grid container spacing={4} justifyContent="center">
-          {history.map((item, index) => (
+          {filteredHistory.map((item, index) => (
             <Grid
               item
               xs={12}
@@ -134,13 +168,9 @@ const PurchaseHistoryPage = () => {
                     borderRadius: "20px",
                     background: "rgba(255,255,255,0.05)",
                     backdropFilter: "blur(20px)",
-                    WebkitBackdropFilter: "blur(20px)",
                     border: "1px solid rgba(255,255,255,0.1)",
                     boxShadow: "0 0 30px rgba(147,51,234,0.2)",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    width: "100%",
+                    position: "relative",
                   }}
                 >
                   <Tooltip title="เลือกสิ่งที่จะคัดลอก">

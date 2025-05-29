@@ -179,12 +179,30 @@ exports.buyProduct = async (req, res) => {
 // ✅ ประวัติการซื้อ
 exports.getPurchaseHistory = async (req, res) => {
   try {
-    const history = await PurchaseHistory.find({
-      userId: req.user._id,
-    }).populate("productId");
-    res.json(history);
+    const history = await PurchaseHistory.find({ userId: req.user._id })
+      .populate({
+        path: "productId",
+        select: "name image price categoryId",
+      })
+      .sort({ createdAt: -1 });
+
+    // แปลงให้ส่ง product.name ได้ตรงกับฝั่ง frontend
+    const result = history.map((item) => ({
+      _id: item._id,
+      username: item.username,
+      password: item.password,
+      createdAt: item.createdAt,
+      product: {
+        name: item.productId?.name || "ไม่พบชื่อสินค้า",
+        image: item.productId?.image || "",
+        price: item.productId?.price || 0,
+        categoryId: item.productId?.categoryId || null,
+      },
+    }));
+
+    res.json(result);
   } catch (err) {
-    console.error(err);
+    console.error("❌ Error loading purchase history:", err);
     res.status(500).send("โหลดประวัติการซื้อไม่สำเร็จ");
   }
 };

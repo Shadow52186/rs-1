@@ -17,7 +17,6 @@ const purchaseHistorySchema = new mongoose.Schema(
       ref: "ProductStock",
       required: true,
     },
-    // ✅ เพิ่ม 2 field นี้
     username: String,
     password: String,
   },

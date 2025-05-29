@@ -20,10 +20,10 @@ const AllProductsPage = () => {
   const [stockMap, setStockMap] = useState({});
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchTerm, setSearchTerm] = useState(""); // ✅ ช่องค้นหา
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -72,14 +72,17 @@ const AllProductsPage = () => {
   };
 
   const handleViewProduct = (id) => {
-  navigate(`/product/${id}`);
-  window.location.reload(); // ✅ บังคับ reload หน้าใหม่
-};
+    navigate(`/product/${id}`);
+    window.location.reload();
+  };
 
-  const filteredProducts =
-    selectedCategory === "all"
-      ? products
-      : products.filter((p) => p.categoryId === selectedCategory);
+  // ✅ กรองด้วยหมวดหมู่ + ช่องค้นหา
+  const filteredProducts = products.filter((p) => {
+    const matchCategory =
+      selectedCategory === "all" || p.categoryId === selectedCategory;
+    const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchCategory && matchSearch;
+  });
 
   return (
     <Box sx={{ position: "relative", minHeight: "100vh", overflowX: "hidden" }}>
@@ -134,7 +137,7 @@ const AllProductsPage = () => {
         </Typography>
 
         {/* ✅ Filter Button */}
-        <Box textAlign="center" mb={5}>
+        <Box textAlign="center" mb={3}>
           <IconButton
             onClick={handleMenuOpen}
             sx={{
@@ -191,25 +194,48 @@ const AllProductsPage = () => {
           </Menu>
         </Box>
 
+        {/* ✅ Search Field */}
+        <Box
+          sx={{
+            maxWidth: "600px",
+            mx: "auto",
+            mb: 5,
+          }}
+        >
+          <input
+            type="text"
+            placeholder="🔍 ค้นหาสินค้า..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "14px 20px",
+              borderRadius: "12px",
+              fontSize: "16px",
+              border: "none",
+              outline: "none",
+              background: "rgba(255, 255, 255, 0.08)",
+              color: "#fff",
+              boxShadow: "0 0 12px rgba(168, 85, 247, 0.2)",
+            }}
+          />
+        </Box>
+
         {/* ✅ Products */}
         <Box
           sx={{
             background: "rgba(255, 255, 255, 0.05)",
             backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
             border: "1px solid rgba(255, 255, 255, 0.08)",
             borderRadius: "20px",
             padding: 5,
             boxShadow: "0 0 50px rgba(147, 51, 234, 0.2)",
-            minHeight: "80vh",
-            width: "100%",
             maxWidth: "1500px",
             mx: "auto",
           }}
         >
           <Grid container spacing={4} justifyContent="center">
             {filteredProducts.map((product, i) => {
-              const imageUrl = `${process.env.REACT_APP_API.replace("/api", "")}${product.image}`;
               const tag = product.status || "";
               const stock = stockMap[product._id] ?? 0;
 
@@ -226,7 +252,6 @@ const AllProductsPage = () => {
                       borderRadius: "24px",
                       overflow: "hidden",
                       boxShadow: "0 8px 24px rgba(147, 51, 234, 0.3)",
-                      transition: "0.3s",
                       height: "100%",
                       display: "flex",
                       flexDirection: "column",
