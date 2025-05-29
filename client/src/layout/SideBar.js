@@ -24,53 +24,58 @@ const SideBar = () => {
 
   const menuItems = (
     <Menu
-  iconShape="square"
-  menuItemStyles={{
-    button: {
-      color: "#000",
-      "&:hover": {
-        backgroundColor: "#f0f0f0",
-        color: "#000",
-      },
-    },
-    label: {
-      color: "#000",
-    },
-  }}
->
-  <MenuItem
-    icon={<HomeOutlinedIcon />}
-    component={<Link to="/user/index" />}
-  >
-    หน้าบ้าน
-  </MenuItem>
-
-  <SubMenu label="Data" icon={<MapOutlinedIcon />}>
-    <MenuItem
-      icon={<TableViewIcon />}
-      component={<Link to="/admin/viewtable" />}
+      iconShape="square"
+      menuItemStyles={{
+        button: {
+          color: "#000",
+          "&:hover": {
+            backgroundColor: "#f0f0f0",
+            color: "#000",
+          },
+        },
+        label: {
+          color: "#000",
+        },
+      }}
     >
-      Table
-    </MenuItem>
-    <MenuItem
-      icon={<BarChartOutlinedIcon />}
-      component={<Link to="/admin/stats/sales" />}
-    >
-      สถิติยอดขาย
-    </MenuItem>
-  </SubMenu>
+      <MenuItem
+        icon={<HomeOutlinedIcon />}
+        component={<Link to="/user/index" />}
+      >
+        หน้าบ้าน
+      </MenuItem>
 
-  <SubMenu label="Manage" icon={<PeopleOutlinedIcon />}>
-    <MenuItem component={<Link to="/admin/manage" />}>User</MenuItem>
-    <MenuItem component={<Link to="/admin/manage-category" />}>
-      Category
-    </MenuItem>
-  </SubMenu>
+      <SubMenu label="Data" icon={<MapOutlinedIcon />}>
+        <MenuItem
+          icon={<TableViewIcon />}
+          component={<Link to="/admin/viewtable" />}
+        >
+          Table
+        </MenuItem>
+        <MenuItem
+          icon={<BarChartOutlinedIcon />}
+          component={<Link to="/admin/stats/sales" />}
+        >
+          สถิติยอดขาย
+        </MenuItem>
+        <MenuItem
+          icon={<ReceiptOutlinedIcon />}
+          component={<Link to="/admin/sales-history" />}
+        >
+          ประวัติการขาย
+        </MenuItem>
+      </SubMenu>
 
-  <MenuItem icon={<CalendarTodayOutlinedIcon />}>Calendar</MenuItem>
-  <MenuItem icon={<ReceiptOutlinedIcon />}>Documentation</MenuItem>
-</Menu>
+      <SubMenu label="Manage" icon={<PeopleOutlinedIcon />}>
+        <MenuItem component={<Link to="/admin/manage" />}>User</MenuItem>
+        <MenuItem component={<Link to="/admin/manage-category" />}>
+          Category
+        </MenuItem>
+      </SubMenu>
 
+      <MenuItem icon={<CalendarTodayOutlinedIcon />}>Calendar</MenuItem>
+      <MenuItem icon={<ReceiptOutlinedIcon />}>Documentation</MenuItem>
+    </Menu>
   );
 
   return (

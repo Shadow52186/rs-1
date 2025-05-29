@@ -1,5 +1,10 @@
 import "./App.css";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
@@ -13,6 +18,7 @@ import Addproduct from "./components/pages/admin/Addproduct";
 import EditProduct from "./components/EditProduct";
 import ManageStock from "./components/pages/admin/ManageStock";
 import StatsSalesPage from "./components/pages/admin/StatsSalesPage";
+import AdminSalesHistoryPage from "./components/pages/admin/AdminSalesHistoryPage";
 
 // User Pages
 import HomePage from "./components/pages/user/HomePage";
@@ -191,6 +197,14 @@ function App() {
           element={
             <AdminRoute>
               <StatsSalesPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/sales-history"
+          element={
+            <AdminRoute>
+              <AdminSalesHistoryPage />
             </AdminRoute>
           }
         />

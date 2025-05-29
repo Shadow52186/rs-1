@@ -4,7 +4,7 @@ const PurchaseHistory = require("../Models/PurchaseHistory");
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const { validationResult } = require("express-validator");
-const util = require("util"); // 👈 เพิ่มไว้ด้านบนสุดของไฟล์
+const util = require("util"); 
 
 // ✅ Cloudinary Config
 const cloudinary = require("../utils/cloudinary");
@@ -223,5 +223,38 @@ exports.updateStock = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Update stock failed");
+  }
+};
+
+
+// ✅ แสดงประวัติการขายทั้งหมดสำหรับแอดมิน
+exports.getSalesLog = async (req, res) => {
+  try {
+    const history = await PurchaseHistory.find()
+      .populate({
+        path: "productId",
+        select: "name price categoryId",
+        populate: { path: "categoryId", select: "name" }, // ดึงชื่อหมวดหมู่
+      })
+      .populate({
+        path: "userId",
+        select: "username", // ✅ ดึงชื่อผู้ซื้อ
+      })
+      .sort({ createdAt: -1 });
+
+    const result = history.map((item) => ({
+      productName: item.productId?.name || "ไม่พบชื่อสินค้า",
+      category: item.productId?.categoryId?.name || "ไม่ทราบหมวด",
+      price: Number(item.productId?.price || 0),
+      username: item.username,
+      password: item.password,
+      soldAt: item.createdAt,
+      buyer: item.userId?.username || "ไม่ทราบผู้ซื้อ", // ✅ เพิ่มชื่อผู้ซื้อ
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error("❌ Error loading sales log:", err);
+    res.status(500).send("โหลดประวัติการขายไม่สำเร็จ");
   }
 };

@@ -1,8 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const { auth, isAdmin } = require("../Middleware/auth");
+
 const User = require("../Models/User");
 const BannedIP = require("../Models/BannedIP");
+const PurchaseHistory = require("../Models/PurchaseHistory");
+const Product = require("../Models/Product");
+const Category = require("../Models/Category");
 
 // ✅ GET /admin/users
 router.get("/admin/users", auth, isAdmin, async (req, res) => {
@@ -49,6 +53,40 @@ router.delete("/admin/user/:id", auth, isAdmin, async (req, res) => {
     res.send("Deleted");
   } catch (err) {
     res.status(500).send("Delete failed");
+  }
+});
+
+// ✅ GET /admin/sales-log
+router.get("/admin/sales-log", auth, isAdmin, async (req, res) => {
+  try {
+    const sales = await PurchaseHistory.find()
+      .populate({
+        path: "productId",
+        select: "name categoryId price",
+        populate: {
+          path: "categoryId",
+          model: "Category",
+          select: "name",
+        },
+      })
+      .populate("userId", "username")
+      .sort({ createdAt: -1 });
+
+    const result = sales.map((item) => ({
+      _id: item._id,
+      productName: item.productId?.name || "ไม่พบชื่อสินค้า",
+      category: item.productId?.categoryId?.name || "ไม่พบหมวดหมู่",
+      username: item.username,
+      password: item.password,
+      price: item.productId?.price || 0,
+      soldAt: item.createdAt,
+      buyerUsername: item.userId?.username || "ไม่พบผู้ซื้อ",
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error("❌ โหลดประวัติการขายล้มเหลว", err);
+    res.status(500).send("โหลดประวัติการขายล้มเหลว");
   }
 });
 
