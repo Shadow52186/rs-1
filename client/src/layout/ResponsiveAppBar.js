@@ -179,8 +179,7 @@ function ResponsiveAppBar() {
             </Box>
 
             {/* Right Side */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}> 
               <IconButton
                 onClick={toggleDrawer(true)}
                 sx={{ display: { xs: "flex", xl: "none" }, color: "white" }}
