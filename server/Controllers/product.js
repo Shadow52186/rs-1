@@ -4,7 +4,7 @@ const PurchaseHistory = require("../Models/PurchaseHistory");
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const { validationResult } = require("express-validator");
-const util = require("util"); 
+const util = require("util");
 
 // ✅ Cloudinary Config
 const cloudinary = require("../utils/cloudinary");
@@ -35,7 +35,7 @@ exports.uploadProductHandler = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, detail, price, categoryId } = req.body;
+    const { name, detail, price, categoryId, isFeatured } = req.body;
 
     const product = new Product({
       name,
@@ -44,14 +44,20 @@ exports.uploadProductHandler = async (req, res) => {
       categoryId,
       image: req.file?.path || "",
       imagePublicId: req.file?.filename || "",
+      isFeatured: isFeatured === "true",
     });
 
     await product.save();
     res.send("Product uploaded successfully");
   } catch (err) {
     console.error("❌ UPLOAD ERROR (stringify):", JSON.stringify(err, null, 2));
-    console.error("❌ UPLOAD ERROR (inspect):", util.inspect(err, { showHidden: false, depth: null }));
-    res.status(500).json({ error: err.message || "Upload failed", stack: err.stack });
+    console.error(
+      "❌ UPLOAD ERROR (inspect):",
+      util.inspect(err, { showHidden: false, depth: null })
+    );
+    res
+      .status(500)
+      .json({ error: err.message || "Upload failed", stack: err.stack });
   }
 };
 
@@ -59,7 +65,7 @@ exports.uploadProductHandler = async (req, res) => {
 // ✅ แก้ไขสินค้า
 exports.updateProduct = async (req, res) => {
   try {
-    const { name, detail, price, categoryId } = req.body;
+    const { name, detail, price, categoryId, isFeatured } = req.body;
     const { id } = req.params;
 
     const product = await Product.findById(id);
@@ -75,6 +81,7 @@ exports.updateProduct = async (req, res) => {
     product.detail = detail;
     product.price = price;
     product.categoryId = categoryId;
+    product.isFeatured = isFeatured === "true"; // ✅ ใหม่
 
     if (req.file) {
       product.image = req.file.path;
@@ -207,7 +214,6 @@ exports.getPurchaseHistory = async (req, res) => {
   }
 };
 
-
 // ✅ อัปเดต Stock
 exports.updateStock = async (req, res) => {
   try {
@@ -225,7 +231,6 @@ exports.updateStock = async (req, res) => {
     res.status(500).send("Update stock failed");
   }
 };
-
 
 // ✅ แสดงประวัติการขายทั้งหมดสำหรับแอดมิน
 exports.getSalesLog = async (req, res) => {
@@ -256,5 +261,15 @@ exports.getSalesLog = async (req, res) => {
   } catch (err) {
     console.error("❌ Error loading sales log:", err);
     res.status(500).send("โหลดประวัติการขายไม่สำเร็จ");
+  }
+};
+
+exports.getFeaturedProducts = async (req, res) => {
+  try {
+    const featured = await Product.find({ isFeatured: true }).limit(6);
+    res.json(featured);
+  } catch (err) {
+    console.error("❌ Error loading featured products:", err);
+    res.status(500).send("โหลดสินค้าแนะนำไม่สำเร็จ");
   }
 };

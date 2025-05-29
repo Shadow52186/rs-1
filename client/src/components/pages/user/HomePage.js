@@ -16,7 +16,7 @@ const HomePage = () => {
     { label: "ยอดขายสำเร็จ", value: 0, suffix: "" },
     { label: "สินค้าในระบบ", value: 0, suffix: "" },
   ]);
-
+  const [featuredProducts, setFeaturedProducts] = useState([]);
   const categoryRef = useRef(null);
   const navigate = useNavigate();
 
@@ -48,8 +48,20 @@ const HomePage = () => {
       }
     };
 
+    const fetchFeaturedProducts = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.REACT_APP_API}/product/featured`
+        );
+        setFeaturedProducts(res.data);
+      } catch (err) {
+        console.error("Failed to fetch featured products:", err);
+      }
+    };
+
     fetchCategories();
     fetchStats();
+    fetchFeaturedProducts(); // ✅ เพิ่มตรงนี้
   }, []);
 
   return (
@@ -105,7 +117,13 @@ const HomePage = () => {
         >
           {/* Left Text */}
           <Box sx={{ maxWidth: 600, textAlign: { xs: "center", md: "left" } }}>
-            <Box sx={{ display: "flex", justifyContent: { xs: "center", md: "flex-start" }, mb: -2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: { xs: "center", md: "flex-start" },
+                mb: -2,
+              }}
+            >
               <Box
                 component="img"
                 src={`${process.env.PUBLIC_URL}/assets/logo 3.png`}
@@ -273,7 +291,8 @@ const HomePage = () => {
                       color: "#fff",
                       fontWeight: "bold",
                       fontSize: "clamp(15px, 4vw, 25px)",
-                      textShadow: "0 0 15px rgba(61, 61, 61, 0.9), 0 0 25px #a855f7",
+                      textShadow:
+                        "0 0 15px rgba(61, 61, 61, 0.9), 0 0 25px #a855f7",
                       textAlign: "center",
                       whiteSpace: "nowrap",
                       zIndex: 2,
@@ -285,6 +304,135 @@ const HomePage = () => {
               />
             </Box>
           </Box>
+        </Box>
+
+        {/* ✅ แนะนำสินค้า */}
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: "1300px",
+            mx: "auto",
+            px: 2,
+            pt: 8,
+            zIndex: 300,
+          }}
+        >
+          <Typography
+            variant="h4"
+            sx={{
+              color: "#fff",
+              textAlign: "center",
+              mb: 6,
+              fontWeight: "bold",
+              textShadow: "0 0 15px #a855f7, 0 0 25px #9333ea",
+              fontSize: "28px",
+            }}
+          >
+            ⭐ สินค้าแนะนำ
+          </Typography>
+
+          <Grid
+            container
+            spacing={4}
+            justifyContent="center"
+            alignItems="stretch"
+          >
+            {featuredProducts.map((product) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
+                <motion.div
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  viewport={{ once: true }}
+                >
+                  <Box
+                    onClick={() => {
+                      navigate(`/product/${product._id}`);
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 50); // รีโหลดหลังเปลี่ยน path เล็กน้อย
+                    }}
+                    sx={{
+                      background: "rgba(17,17,17, 0.7)",
+                      backdropFilter: "blur(12px)",
+                      WebkitBackdropFilter: "blur(12px)",
+                      borderRadius: "20px",
+                      border: "1px solid rgba(255,255,255,0.05)",
+                      boxShadow: "0 0 30px rgba(168,85,247,0.3)",
+                      overflow: "hidden",
+                      transition: "0.3s",
+                      display: "flex",
+                      flexDirection: "column",
+                      height: "100%",
+                      "&:hover": {
+                        transform: "scale(1.02)",
+                        boxShadow: "0 0 40px rgba(168,85,247,0.6)",
+                      },
+                    }}
+                  >
+                    {/* ✅ รูปสินค้า */}
+                    <Box
+                      sx={{
+                        height: "350px",
+                        width: "350px",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </Box>
+
+                    {/* ✅ รายละเอียด */}
+                    <Box sx={{ p: 2 }}>
+                      <Typography
+                        sx={{
+                          color: "#fff",
+                          fontWeight: "bold",
+                          fontSize: "16px",
+                          mb: 0.5,
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {product.name}
+                      </Typography>
+
+                      <Typography
+                        sx={{
+                          color: "#ccc",
+                          fontSize: "14px",
+                          mb: 1,
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {product.detail?.slice(0, 30)}...
+                      </Typography>
+
+                      <Typography
+                        sx={{
+                          color: "#00ffc3",
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                        }}
+                      >
+                        💰 ราคา {product.price} บาท
+                      </Typography>
+                    </Box>
+                  </Box>
+                </motion.div>
+              </Grid>
+            ))}
+          </Grid>
         </Box>
 
         {/* Categories */}

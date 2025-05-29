@@ -263,8 +263,8 @@ const AllProductsPage = () => {
                         src={product.image}
                         alt={product.name}
                         sx={{
-                          width: "300px",
-                          height: "230px",
+                          width: "350px",
+                          height: "350px",
                           objectFit: "cover",
                           display: "block",
                           borderTopLeftRadius: "24px",

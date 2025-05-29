@@ -51,6 +51,17 @@ router.get("/product", async (req, res) => {
   }
 });
 
+// ✅ ดึงสินค้าที่แนะนำ
+router.get("/product/featured", async (req, res) => {
+  try {
+    const products = await Product.find({ isFeatured: true }).limit(6).sort({ createdAt: -1 });
+    res.json(products);
+  } catch (err) {
+    console.error("โหลดสินค้าแนะนำล้มเหลว:", err);
+    res.status(500).send("โหลดสินค้าแนะนำไม่สำเร็จ");
+  }
+});
+
 // ✅ อัปโหลดสินค้า
 router.post("/product/upload", uploadProduct, uploadProductHandler);
 
@@ -104,5 +115,7 @@ router.put("/stock/:id", async (req, res) => {
   }
   return updateStock(req, res);
 });
+
+
 
 module.exports = router;

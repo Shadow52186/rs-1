@@ -9,6 +9,8 @@ import {
   MenuItem,
   Grid,
   Divider,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -27,6 +29,7 @@ const AddProduct = () => {
   const [products, setProducts] = useState([]);
   const [editId, setEditId] = useState(null);
   const [stockMap, setStockMap] = useState({});
+  const [isFeatured, setIsFeatured] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -90,6 +93,7 @@ const AddProduct = () => {
     formData.append("detail", detail);
     formData.append("price", Number(price)); // ✅ ensure it's a number
     formData.append("categoryId", categoryId);
+    formData.append("isFeatured", isFeatured); // ✅ ขาดไม่ได้!
     if (imageFile) formData.append("image", imageFile);
 
     const token = localStorage.getItem("token");
@@ -148,6 +152,8 @@ const AddProduct = () => {
       (cat) => cat._id === product.categoryId
     );
     setCategoryId(foundCategory ? product.categoryId : "");
+
+    setIsFeatured(product.isFeatured || false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -225,6 +231,16 @@ const AddProduct = () => {
                 </MenuItem>
               ))}
             </TextField>
+            {/* ✅ ตรงนี้คือ Checkbox ใหม่ */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isFeatured}
+                  onChange={(e) => setIsFeatured(e.target.checked)}
+                />
+              }
+              label="แสดงในสินค้าแนะนำ"
+            />
 
             <Button variant="outlined" component="label">
               เลือกรูปภาพ

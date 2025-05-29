@@ -7,20 +7,23 @@ const productSchema = new mongoose.Schema(
     price: String,
     image: {
       type: String,
-      default: "noimage.jpg", // จะถูกแทนที่เมื่ออัปโหลด
+      default: "noimage.jpg",
     },
     imagePublicId: {
       type: String,
-      default: "", // ไว้เก็บ Public ID สำหรับลบจาก Cloudinary
+      default: "",
     },
     categoryId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: true,
     },
+    isFeatured: {
+      type: Boolean,
+      default: false, // ✅ เพิ่มตรงนี้
+    },
   },
   { timestamps: true }
 );
 
-module.exports =
-  mongoose.models.Product || mongoose.model("Product", productSchema);
+module.exports = mongoose.models.Product || mongoose.model("Product", productSchema);

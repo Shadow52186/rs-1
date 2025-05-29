@@ -9,6 +9,12 @@ import {
   Grid,
   Stack,
 } from "@mui/material";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFacebook,
+  faInstagram,
+  faDiscord,
+} from "@fortawesome/free-brands-svg-icons";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Particles from "../../../components/effects/Particles";
@@ -116,15 +122,15 @@ const ProductDetailPage = () => {
           particleCount={300}
           particleColors={["#ffffff", "#bbf7ff", "#c084fc"]}
           particleBaseSize={80}
-          moveParticlesOnHover={true}
+          moveParticlesOnHover
           particleHoverFactor={1.5}
-          alphaParticles={true}
+          alphaParticles
         />
         <Threads
           color={[0.6, 0.3, 1]}
           amplitude={0.8}
           distance={0.0}
-          enableMouseInteraction={true}
+          enableMouseInteraction
         />
       </Box>
 
@@ -169,6 +175,43 @@ const ProductDetailPage = () => {
                     <Typography variant="body1" sx={{ color: "#ddd" }}>
                       📃 {product.detail}
                     </Typography>
+                    {/* ✅ Social Icons */}
+                    <Box sx={{ textAlign: "left", mt: 4 }}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          color: "#fff",
+                          fontWeight: "bold",
+                          mb: 1,
+                          textShadow: "0 0 8px #c084fc",
+                        }}
+                      >
+                        
+                      </Typography>
+                      <Box sx={{ display: "flex", justifyContent: "left", gap: 4 }}>
+                        <a
+                          href="https://www.facebook.com/eurotinnapat.saelee"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FontAwesomeIcon icon={faFacebook}  style={{ color: "#3b82f6" , fontSize: "25px" }} />
+                        </a>
+                        <a
+                          href="https://www.instagram.com/quax.tix/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FontAwesomeIcon icon={faInstagram}  style={{ color: "#3b82f6" , fontSize: "25px" }} />
+                        </a>
+                        <a
+                          href="https://discord.gg/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FontAwesomeIcon icon={faDiscord}  style={{ color: "#3b82f6" , fontSize: "25px" }} />
+                        </a>
+                      </Box>
+                    </Box>
 
                     <Divider sx={{ borderColor: "#555" }} />
 
@@ -203,6 +246,8 @@ const ProductDetailPage = () => {
                     >
                       {isBuying ? "⏳ กำลังซื้อ..." : "🛍️ ซื้อสินค้า"}
                     </Button>
+
+                    
                   </Stack>
                 </Grid>
               </Grid>
