@@ -19,7 +19,7 @@ const TopupHistoryPage = () => {
           `${process.env.REACT_APP_API}/topup/history`,
           config
         );
-        setHistory(res.data);
+        setHistory(res.data.history || []);
       } catch (err) {
         console.error("❌ ไม่สามารถโหลดประวัติการเติมเงินได้", err);
       }
@@ -27,6 +27,10 @@ const TopupHistoryPage = () => {
 
     fetchHistory();
   }, [token]);
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString("th-TH");
+  };
 
   return (
     <Box sx={{ position: "relative", minHeight: "100vh", overflowX: "hidden" }}>
@@ -100,7 +104,7 @@ const TopupHistoryPage = () => {
                     background: "rgba(255,255,255,0.05)",
                     backdropFilter: "blur(20px)",
                     WebkitBackdropFilter: "blur(20px)",
-                    height: "200px", // ✅ ทำให้กรอบสูงสุดเท่ากันในแต่ละแถว
+                    height: "auto",
                     border: "1px solid rgba(255,255,255,0.1)",
                     boxShadow: "0 0 30px rgba(147,51,234,0.2)",
                   }}
@@ -116,15 +120,37 @@ const TopupHistoryPage = () => {
                         {item.amount} บาท
                       </Box>
                     </Typography>
+
+                    {item.method && (
+                      <Typography fontSize="15px" sx={{ color: "#ddd" }}>
+                        📲 ช่องทาง:{" "}
+                        {item.method === "bank" ? "โอนผ่านธนาคาร" : "TrueMoney"}
+                      </Typography>
+                    )}
+
+                    {item.transaction_id && (
+                      <Typography fontSize="14px" sx={{ color: "#ccc" }}>
+                        🔐 เลขอ้างอิง: {item.transaction_id}
+                      </Typography>
+                    )}
+
+                    
+                    {item.slip_time && (
+                      <Typography fontSize="14px" sx={{ color: "#ccc" }}>
+                        ⏱️ เวลาตามสลิป: {formatDate(item.slip_time)}
+                      </Typography>
+                    )}
+
                     {item.note && (
                       <Typography fontSize="15px" sx={{ color: "#ddd" }}>
                         📝 หมายเหตุ: {item.note}
                       </Typography>
                     )}
+
                     <Divider sx={{ borderColor: "rgba(255,255,255,0.2)" }} />
+
                     <Typography fontSize="14px" sx={{ color: "#bbb" }}>
-                      🕒 วันที่:{" "}
-                      {new Date(item.createdAt).toLocaleString("th-TH")}
+                      🕒 วันที่บันทึก: {formatDate(item.createdAt)}
                     </Typography>
                   </Stack>
                 </Card>

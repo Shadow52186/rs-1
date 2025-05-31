@@ -1,17 +1,23 @@
 const mongoose = require("mongoose");
+const SlipTopup = require("../Models/SlipTopup");
 const TopupHistory = require("../Models/TopupHistory");
+
 
 exports.getTopupHistory = async (req, res) => {
   try {
-    console.log("✅ USER IN TOKEN =", req.user); // 🟢 เพิ่มตรงนี้
+    const history = await TopupHistory.find({ userId: req.user.id })
+      .sort({ createdAt: -1 });
 
-    const history = await TopupHistory.find({
-      userId: new mongoose.Types.ObjectId(req.user.id)
-    }).sort({ createdAt: -1 });
+    // 🛠️ แปลง sender/receiver เป็นข้อความ หากเป็น object
+    const cleanedHistory = history.map((entry) => ({
+      ...entry._doc,
+      sender: typeof entry.sender === 'object' ? JSON.stringify(entry.sender) : entry.sender,
+      receiver: typeof entry.receiver === 'object' ? JSON.stringify(entry.receiver) : entry.receiver,
+    }));
 
-    res.json(history);
+    res.json({ history: cleanedHistory });
   } catch (err) {
-    console.error("❌ โหลดประวัติการเติมเงินล้มเหลว", err);
-    res.status(500).send("Server Error");
+    console.error("❌ ดึงประวัติการเติมเงินล้มเหลว", err);
+    res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูล" });
   }
 };
