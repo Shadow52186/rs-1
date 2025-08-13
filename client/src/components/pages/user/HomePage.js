@@ -41,7 +41,7 @@ const HomePage = () => {
         setStats([
           { label: "ผู้ใช้งาน", value: data.users + 200 || 0, suffix: "" },
           { label: "ยอดขายสำเร็จ", value: data.sold + 993 || 0, suffix: "" },
-          { label: "สินค้าในระบบ", value: data.products + 100|| 0, suffix: "" },
+          { label: "สินค้าในระบบ", value: data.products || 0, suffix: "" },
         ]);
       } catch (err) {
         console.error("Failed to fetch stats:", err);
