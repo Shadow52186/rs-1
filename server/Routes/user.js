@@ -30,7 +30,7 @@ router.get("/users", auth, isAdmin, async (req, res) => {
   res.json({ items, total, page, pageSize });
 });
 
-// ✅ Register (แค่ตัวเดียวพอ)
+
 router.post(
   "/register",
   registerLimiter,

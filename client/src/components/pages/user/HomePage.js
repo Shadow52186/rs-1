@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import { Box, Typography, Button, Grid } from "@mui/material";
 import CountUp from "react-countup";
 import axios from "axios";
@@ -9,94 +9,410 @@ import BlurText from "../../../components/effects/BlurText";
 import TiltedCard from "../../../components/effects/TiltedCard";
 import { motion } from "framer-motion";
 
-const HomePage = () => {
-  const [categories, setCategories] = useState([]);
-  const [stats, setStats] = useState([
-    { label: "ผู้ใช้งาน", value: 0, suffix: "" },
-    { label: "ยอดขายสำเร็จ", value: 0, suffix: "" },
-    { label: "สินค้าในระบบ", value: 0, suffix: "" },
-  ]);
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const categoryRef = useRef(null);
-  const navigate = useNavigate();
 
-  const scrollToCategories = () => {
-    categoryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+const api = axios.create({
+  timeout: 3000, 
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+  }
+});
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await axios.get(`${process.env.REACT_APP_API}/categories`);
-        setCategories(res.data);
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-      }
-    };
+// Cache for API responses
+const cache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; 
 
-    const fetchStats = async () => {
-      try {
-        const res = await axios.get(`${process.env.REACT_APP_API}/stats`);
-        const data = res.data;
-        setStats([
-          { label: "ผู้ใช้งาน", value: data.users || 0, suffix: "" },
-          { label: "ยอดขายสำเร็จ", value: data.sold || 0, suffix: "" },
-          { label: "สินค้าในระบบ", value: data.products || 0, suffix: "" },
-        ]);
-      } catch (err) {
-        console.error("Failed to fetch stats:", err);
-      }
-    };
+// Optimized fetch with caching
+const fetchWithCache = async (url) => {
+  const cacheKey = url;
+  const cached = cache.get(cacheKey);
+  
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
 
-    const fetchFeaturedProducts = async () => {
-      try {
-        const res = await axios.get(
-          `${process.env.REACT_APP_API}/product/featured`
-        );
-        setFeaturedProducts(res.data);
-      } catch (err) {
-        console.error("Failed to fetch featured products:", err);
-      }
-    };
+  try {
+    const response = await api.get(url);
+    cache.set(cacheKey, {
+      data: response.data,
+      timestamp: Date.now()
+    });
+    return response.data;
+  } catch (error) {
+    // Return cached data if available, even if expired
+    if (cached) return cached.data;
+    throw error;
+  }
+};
 
-    fetchCategories();
-    fetchStats();
-    fetchFeaturedProducts(); 
-  }, []);
-
-  return (
-    <Box sx={{ position: "relative", width: "100%", overflowX: "hidden" }}>
-      {/* Background */}
+// Skeleton loader component
+const SkeletonLoader = React.memo(() => (
+  <Box sx={{ position: "relative", width: "100%", overflowX: "hidden" }}>
+    <Box
+      sx={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)",
+        zIndex: 0,
+      }}
+    />
+    <Box sx={{ px: 2, py: 10, position: "relative", zIndex: 2 }}>
       <Box
         sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          zIndex: 0,
-          pointerEvents: "none",
+          width: "100%",
+          maxWidth: "1500px",
+          mx: "auto",
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 6,
+          minHeight: "100vh",
         }}
       >
-        <Box sx={{ position: "absolute", inset: 0, zIndex: 0 }}>
-          <Particles
-            particleCount={300}
-            particleColors={["#ffffff", "#bbf7ff", "#c084fc"]}
-            particleBaseSize={80}
-            moveParticlesOnHover
-            particleHoverFactor={1.5}
-            alphaParticles
+        <Box sx={{ maxWidth: 600, textAlign: { xs: "center", md: "left" } }}>
+          <Box
+            sx={{
+              width: 200,
+              height: 100,
+              background: "linear-gradient(90deg, #333 25%, transparent 37%, #333 63%)",
+              backgroundSize: "400% 100%",
+              animation: "shimmer 1.5s ease-in-out infinite",
+              borderRadius: "10px",
+              mb: 4,
+              mx: { xs: "auto", md: 0 },
+              "@keyframes shimmer": {
+                "0%": { backgroundPosition: "100% 0" },
+                "100%": { backgroundPosition: "-100% 0" }
+              }
+            }}
           />
+          {[1, 2, 3].map((i) => (
+            <Box
+              key={i}
+              sx={{
+                width: `${100 - i * 10}%`,
+                height: 40,
+                background: "linear-gradient(90deg, #333 25%, transparent 37%, #333 63%)",
+                backgroundSize: "400% 100%",
+                animation: "shimmer 1.5s ease-in-out infinite",
+                borderRadius: "8px",
+                mb: 2,
+                mx: { xs: "auto", md: 0 },
+              }}
+            />
+          ))}
         </Box>
-        <Box sx={{ position: "absolute", inset: 0, zIndex: 1 }}>
-          <Threads
-            color={[0.6, 0.3, 1]}
-            amplitude={0.8}
-            distance={0.0}
-            enableMouseInteraction
+        <Box sx={{ width: { xs: "100%", md: "50%" } }}>
+          <Box
+            sx={{
+              width: "100%",
+              height: 400,
+              background: "linear-gradient(90deg, #333 25%, transparent 37%, #333 63%)",
+              backgroundSize: "400% 100%",
+              animation: "shimmer 1.5s ease-in-out infinite",
+              borderRadius: "20px",
+            }}
           />
         </Box>
       </Box>
+    </Box>
+  </Box>
+));
+
+// Optimized API hook with aggressive caching and reduced loading time
+const useAPIData = () => {
+  const [data, setData] = useState({
+    categories: [],
+    stats: [
+      { label: "ผู้ใช้งาน", value: 0, suffix: "" },
+      { label: "ยอดขายสำเร็จ", value: 0, suffix: "" },
+      { label: "สินค้าในระบบ", value: 0, suffix: "" },
+    ],
+    featuredProducts: []
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    
+    const fetchAllData = async () => {
+      try {
+        const baseURL = process.env.REACT_APP_API;
+        
+        // Start all requests immediately
+        const requests = [
+          fetchWithCache(`${baseURL}/categories`),
+          fetchWithCache(`${baseURL}/stats`),
+          fetchWithCache(`${baseURL}/product/featured`)
+        ];
+
+        // Use Promise.allSettled for better error handling
+        const results = await Promise.allSettled(requests);
+        
+        const newData = { ...data };
+        
+        // Process categories
+        if (results[0].status === 'fulfilled') {
+          newData.categories = results[0].value || [];
+        }
+        
+        // Process stats
+        if (results[1].status === 'fulfilled') {
+          const statsData = results[1].value;
+          newData.stats = [
+            { label: "ผู้ใช้งาน", value: statsData?.users || 0, suffix: "" },
+            { label: "ยอดขายสำเร็จ", value: statsData?.sold || 0, suffix: "" },
+            { label: "สินค้าในระบบ", value: statsData?.products || 0, suffix: "" },
+          ];
+        }
+        
+        // Process featured products
+        if (results[2].status === 'fulfilled') {
+          newData.featuredProducts = results[2].value || [];
+        }
+        
+        setData(newData);
+        
+        // Minimal loading time for better UX
+        setTimeout(() => setIsLoading(false), 100);
+        
+      } catch (error) {
+        console.error("API Error:", error);
+        // Still show content even if some requests fail
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllData();
+    
+    return () => controller.abort();
+  }, []);
+
+  return { ...data, isLoading };
+};
+
+// Memoized and optimized background component
+const BackgroundEffects = React.memo(() => (
+  <Box
+    sx={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      zIndex: 0,
+      pointerEvents: "none",
+    }}
+  >
+    <Box sx={{ position: "absolute", inset: 0, zIndex: 0 }}>
+      <Particles
+        particleCount={150} // Reduced from 300
+        particleColors={["#ffffff", "#bbf7ff", "#c084fc"]}
+        particleBaseSize={60} // Reduced from 80
+        moveParticlesOnHover
+        particleHoverFactor={1.3} // Reduced from 1.5
+        alphaParticles
+      />
+    </Box>
+    <Box sx={{ position: "absolute", inset: 0, zIndex: 1 }}>
+      <Threads
+        color={[0.6, 0.3, 1]}
+        amplitude={0.6} // Reduced from 0.8
+        distance={0.0}
+        enableMouseInteraction
+      />
+    </Box>
+  </Box>
+));
+
+// Optimized product card with lazy loading
+const ProductCard = React.memo(({ product, onProductClick }) => (
+  <Grid item xs={12} sm={6} md={4} lg={3}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }} // Reduced from y: 40
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }} // Reduced from 0.5
+      viewport={{ once: true, margin: "-50px" }} // Start animation earlier
+    >
+      <Box
+        onClick={() => onProductClick(product._id)}
+        sx={{
+          background: "rgba(17,17,17, 0.7)",
+          backdropFilter: "blur(8px)", 
+          WebkitBackdropFilter: "blur(8px)",
+          borderRadius: "20px",
+          border: "1px solid rgba(255,255,255,0.05)",
+          boxShadow: "0 0 20px rgba(168,85,247,0.2)", 
+          overflow: "hidden",
+          transition: "0.2s", // Reduced from 0.3s
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          cursor: "pointer",
+          transform: "translateZ(0)", // Force GPU acceleration
+          "&:hover": {
+            transform: "scale(1.02) translateZ(0)",
+            boxShadow: "0 0 30px rgba(168,85,247,0.4)",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            height: "350px",
+            width: "350px",
+            overflow: "hidden",
+          }}
+        >
+          <img
+            src={product.image}
+            alt={product.name}
+            loading="lazy"
+            decoding="async"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              transform: "translateZ(0)",
+            }}
+          />
+        </Box>
+
+        <Box sx={{ p: 2 }}>
+          <Typography
+            sx={{
+              color: "#fff",
+              fontWeight: "bold",
+              fontSize: "16px",
+              mb: 0.5,
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {product.name}
+          </Typography>
+
+          <Typography
+            sx={{
+              color: "#ccc",
+              fontSize: "14px",
+              mb: 1,
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {product.detail?.slice(0, 30)}...
+          </Typography>
+
+          <Typography
+            sx={{
+              color: "#00ffc3",
+              fontWeight: "bold",
+              fontSize: "14px",
+            }}
+          >
+            💰 ราคา {product.price} บาท
+          </Typography>
+        </Box>
+      </Box>
+    </motion.div>
+  </Grid>
+));
+
+// Optimized category card
+const CategoryCard = React.memo(({ category, onCategoryClick }) => (
+  <Grid item xs={12} sm={6}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      viewport={{ once: true, margin: "-50px" }}
+    >
+      <Box
+        onClick={() => onCategoryClick(category._id)}
+        sx={{
+          backgroundColor: "#1f1f1f",
+          borderRadius: "20px",
+          boxShadow: "0 0 20px rgba(168,85,247,0.2)",
+          overflow: "hidden",
+          cursor: "pointer",
+          transition: "0.2s",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          transform: "translateZ(0)",
+          "&:hover": {
+            transform: "scale(1.02) translateZ(0)",
+            boxShadow: "0 0 30px rgba(168,85,247,0.4)",
+          },
+        }}
+      >
+        <img
+          src={category.image}
+          alt={category.name}
+          loading="lazy"
+          decoding="async"
+          style={{
+            width: "100%",
+            height: "auto",
+            maxWidth: "550px",
+            maxHeight: "350px",
+            objectFit: "cover",
+            borderTopLeftRadius: "20px",
+            borderTopRightRadius: "20px",
+            transform: "translateZ(0)",
+          }}
+        />
+      </Box>
+    </motion.div>
+  </Grid>
+));
+
+const HomePage = () => {
+  const { categories, stats, featuredProducts, isLoading } = useAPIData();
+  const categoryRef = useRef(null);
+  const navigate = useNavigate();
+
+  // Optimized navigation handlers
+  const scrollToCategories = useCallback(() => {
+    categoryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const handleProductClick = useCallback((productId) => {
+    navigate(`/product/${productId}`);
+    // Use requestAnimationFrame for smoother scrolling
+  }, [navigate]);
+
+  const handleCategoryClick = useCallback((categoryId) => {
+    navigate(`/category/${categoryId}`);
+  }, [navigate]);
+
+  const handleNavigateToProducts = useCallback(() => {
+    navigate("/products");
+  }, [navigate]);
+
+  const handleLogoClick = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
+
+  // Optimized responsive dimensions
+  const containerHeight = useMemo(() => 
+    window.innerWidth < 600 ? "500px" : "600px", []
+  );
+
+  // Show skeleton loader instead of black screen
+  if (isLoading) {
+    return <SkeletonLoader />;
+  }
+
+  return (
+    <Box sx={{ position: "relative", width: "100%", overflowX: "hidden" }}>
+      <BackgroundEffects />
 
       {/* Content */}
       <Box sx={{ px: 2 }}>
@@ -134,16 +450,17 @@ const HomePage = () => {
                   cursor: "pointer",
                   zIndex: 20,
                 }}
-                onClick={() => navigate("/")}
+                onClick={handleLogoClick}
+                loading="eager" 
               />
             </Box>
 
             <BlurText
               text="RS-Shop"
-              delay={80}
+              delay={50} // Reduced from 80
               animateBy="letters"
               direction="top"
-              stepDuration={0.4}
+              stepDuration={0.2} // Reduced from 0.4
               style={{
                 fontSize: "clamp(32px, 6vw, 64px)",
                 fontWeight: 800,
@@ -156,10 +473,10 @@ const HomePage = () => {
             />
             <BlurText
               text="เว็บขายไอดีเกมราคาถูกสุด ปลอดภัยทันใจ"
-              delay={100}
+              delay={60} // Reduced from 100
               animateBy="words"
               direction="top"
-              stepDuration={0.4}
+              stepDuration={0.2} // Reduced from 0.4
               style={{
                 fontSize: "clamp(20px, 4vw, 28px)",
                 fontWeight: 800,
@@ -171,10 +488,10 @@ const HomePage = () => {
             />
             <BlurText
               text="เลือกซื้อไอดีเกมดังหลากหลาย อัปเดตรายวัน ได้รับทันทีหลังชำระเงิน"
-              delay={60}
+              delay={40} // Reduced from 60
               animateBy="words"
               direction="top"
-              stepDuration={0.35}
+              stepDuration={0.15} // Reduced from 0.35
               style={{
                 fontSize: "clamp(14px, 3vw, 18px)",
                 color: "#fff",
@@ -184,7 +501,7 @@ const HomePage = () => {
               }}
             />
             <Button
-              onClick={() => navigate("/products")}
+              onClick={handleNavigateToProducts}
               sx={{
                 background: "linear-gradient(90deg, #a855f7, #6366f1)",
                 color: "#fff",
@@ -194,7 +511,7 @@ const HomePage = () => {
                 borderRadius: "50px",
                 boxShadow: "0 0 25px rgba(168,85,247,0.5)",
                 textTransform: "none",
-                transition: "0.3s",
+                transition: "0.2s", // Reduced from 0.3s
                 "&:hover": {
                   background: "linear-gradient(90deg, #9333ea, #4f46e5)",
                   boxShadow: "0 0 40px rgba(138,43,226,0.7)",
@@ -218,7 +535,7 @@ const HomePage = () => {
                   >
                     <CountUp
                       end={stat.value}
-                      duration={2.5}
+                      duration={1.5} // Reduced from 2.5
                       separator=","
                       suffix={stat.suffix}
                     />
@@ -266,17 +583,17 @@ const HomePage = () => {
                 altText="สินค้าเด่น"
                 captionText="คลิกเพื่อดูสินค้า"
                 containerWidth="100%"
-                containerHeight={window.innerWidth < 600 ? "700px" : "600px"}
+                containerHeight={containerHeight}
                 imageWidth="100%"
                 imageHeight="100%"
-                scaleOnHover={1.2}
-                rotateAmplitude={15}
+                scaleOnHover={1.1} // Reduced from 1.2
+                rotateAmplitude={10} // Reduced from 15
                 showTooltip={true}
                 showMobileWarning={false}
                 displayOverlayContent={true}
                 imageStyle={{
                   borderRadius: "20px",
-                  transition: "0.4s",
+                  transition: "0.3s", // Reduced from 0.4s
                   filter: `brightness(2) contrast(2) saturate(2.2) drop-shadow(0 0 25px #93c5fd) drop-shadow(0 0 45px #a855f7) drop-shadow(0 0 80px #c084fc)`,
                   boxShadow: "0 0 40px rgba(136, 0, 255, 0.5)",
                   objectFit: "cover",
@@ -306,7 +623,7 @@ const HomePage = () => {
           </Box>
         </Box>
 
-        {/* ✅ แนะนำสินค้า */}
+        {/* Featured Products */}
         <Box
           sx={{
             width: "100%",
@@ -338,99 +655,11 @@ const HomePage = () => {
             alignItems="stretch"
           >
             {featuredProducts.map((product) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
-                <motion.div
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  viewport={{ once: true }}
-                >
-                  <Box
-                    onClick={() => {
-                      navigate(`/product/${product._id}`);
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 50); // รีโหลดหลังเปลี่ยน path เล็กน้อย
-                    }}
-                    sx={{
-                      background: "rgba(17,17,17, 0.7)",
-                      backdropFilter: "blur(12px)",
-                      WebkitBackdropFilter: "blur(12px)",
-                      borderRadius: "20px",
-                      border: "1px solid rgba(255,255,255,0.05)",
-                      boxShadow: "0 0 30px rgba(168,85,247,0.3)",
-                      overflow: "hidden",
-                      transition: "0.3s",
-                      display: "flex",
-                      flexDirection: "column",
-                      height: "100%",
-                      "&:hover": {
-                        transform: "scale(1.02)",
-                        boxShadow: "0 0 40px rgba(168,85,247,0.6)",
-                      },
-                    }}
-                  >
-                    {/* ✅ รูปสินค้า */}
-                    <Box
-                      sx={{
-                        height: "350px",
-                        width: "350px",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    </Box>
-
-                    {/* ✅ รายละเอียด */}
-                    <Box sx={{ p: 2 }}>
-                      <Typography
-                        sx={{
-                          color: "#fff",
-                          fontWeight: "bold",
-                          fontSize: "16px",
-                          mb: 0.5,
-                          overflow: "hidden",
-                          whiteSpace: "nowrap",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {product.name}
-                      </Typography>
-
-                      <Typography
-                        sx={{
-                          color: "#ccc",
-                          fontSize: "14px",
-                          mb: 1,
-                          overflow: "hidden",
-                          whiteSpace: "nowrap",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {product.detail?.slice(0, 30)}...
-                      </Typography>
-
-                      <Typography
-                        sx={{
-                          color: "#00ffc3",
-                          fontWeight: "bold",
-                          fontSize: "14px",
-                        }}
-                      >
-                        💰 ราคา {product.price} บาท
-                      </Typography>
-                    </Box>
-                  </Box>
-                </motion.div>
-              </Grid>
+              <ProductCard
+                key={product._id}
+                product={product}
+                onProductClick={handleProductClick}
+              />
             ))}
           </Grid>
         </Box>
@@ -464,52 +693,11 @@ const HomePage = () => {
 
           <Grid container spacing={4} justifyContent="center">
             {categories.map((cat) => (
-              <Grid item xs={12} sm={6} key={cat._id}>
-                <motion.div
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  viewport={{ once: true }}
-                >
-                  <Box
-                    onClick={() => {
-                      navigate(`/category/${cat._id}`);
-                      window.location.reload();
-                      window.scrollTo(0, 0);
-                    }}
-                    sx={{
-                      backgroundColor: "#1f1f1f",
-                      borderRadius: "20px",
-                      boxShadow: "0 0 30px rgba(168,85,247,0.3)",
-                      overflow: "hidden",
-                      cursor: "pointer",
-                      transition: "0.3s",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      "&:hover": {
-                        transform: "scale(1.02)",
-                        boxShadow: "0 0 40px rgba(168,85,247,0.5)",
-                        zIndex: 300,
-                      },
-                    }}
-                  >
-                    <img
-                      src={cat.image}
-                      alt={cat.name}
-                      style={{
-                        width: "100%",
-                        height: "auto",
-                        maxWidth: "550px",
-                        maxHeight: "350px",
-                        objectFit: "cover",
-                        borderTopLeftRadius: "20px",
-                        borderTopRightRadius: "20px",
-                      }}
-                    />
-                  </Box>
-                </motion.div>
-              </Grid>
+              <CategoryCard
+                key={cat._id}
+                category={cat}
+                onCategoryClick={handleCategoryClick}
+              />
             ))}
           </Grid>
         </Box>

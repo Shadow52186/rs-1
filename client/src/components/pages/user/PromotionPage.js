@@ -11,7 +11,7 @@ const PromotionPage = () => {
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API}/product`) // หากคุณมี endpoint สำหรับโปรโมชันเฉพาะ ให้เปลี่ยนตรงนี้
+      .get(`${process.env.REACT_APP_API}/product`) 
       .then((res) => {
         // สมมุติกรองเฉพาะสินค้าที่ลดราคาเป็นโปรโมชั่น
         const promoOnly = res.data.filter((p) => p.isPromotion);
