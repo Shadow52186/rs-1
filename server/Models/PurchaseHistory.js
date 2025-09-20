@@ -19,6 +19,23 @@ const purchaseHistorySchema = new mongoose.Schema(
     },
     username: String,
     password: String,
+
+    productName: {
+      type: String,
+      required: true
+    },
+    categoryName: {
+      type: String,
+      required: true
+    },
+    buyerUsername: {
+      type: String,
+      required: true
+    },
+    purchasePrice: {
+      type: Number,
+      required: true
+    },
   },
   { timestamps: true }
 );

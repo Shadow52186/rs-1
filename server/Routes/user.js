@@ -8,15 +8,26 @@ const registerLimiter = require("../Middleware/registerLimiter");
 const BannedIP = require("../Models/BannedIP");
 const mongoose = require("mongoose");
 
-// ✅ แสดงผู้ใช้ทั้งหมด (admin เท่านั้น)
+
 router.get("/users", auth, isAdmin, async (req, res) => {
-  try {
-    const users = await User.find().sort({ createdAt: -1 });
-    res.json(users);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Server Error");
-  }
+  const page = Math.max(parseInt(req.query.page) || 1, 1);
+  const pageSize = Math.min(parseInt(req.query.pageSize) || 50, 200);
+  const q = (req.query.q || "").trim();
+
+  const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const filter = q ? { username: { $regex: new RegExp(escape(q), "i") } } : {};
+
+  const [items, total] = await Promise.all([
+    User.find(filter)
+      .select("-password -__v")
+      .sort({ createdAt: -1, _id: -1 })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .lean(),
+    User.countDocuments(filter),
+  ]);
+
+  res.json({ items, total, page, pageSize });
 });
 
 // ✅ Register (แค่ตัวเดียวพอ)

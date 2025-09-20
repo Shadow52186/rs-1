@@ -14,7 +14,7 @@ const topupHistorySchema = new mongoose.Schema({
     type: String
   },
 
-  // ✅ เพิ่ม field ใหม่จาก ByShop แต่ไม่กระทบของเก่า
+  
   transaction_id: {
     type: String,
     unique: true,

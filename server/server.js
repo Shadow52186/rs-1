@@ -16,10 +16,8 @@ const csrf = require("csurf");
 const app = express();
 connectDB();
 
-// ✅ Helmet v6+ ใช้แบบนี้
 app.use(helmet());
 
-// ✅ Content Security Policy (CSP)
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -50,7 +48,7 @@ app.use(
   })
 );
 
-// ✅ CORS หลายโดเมน
+
 const allowedOrigins = (process.env.CLIENT_URL || "")
   .split(",")
   .map((url) => url.trim())

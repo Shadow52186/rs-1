@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { login } from "./store/userSlice";
 import { CssBaseline } from "@mui/material";
 
+
 // Admin Pages
 import ManageUser from "./components/pages/admin/ManageUser";
 import ManageCategory from "./components/pages/admin/ManageCategory";
@@ -30,7 +31,8 @@ import PromotionPage from "./components/pages/user/PromotionPage";
 import TopupHistoryPage from "./components/pages/user/TopupHistoryPage";
 import TopupPage from "./components/pages/user/TopupPage";
 import PurchaseHistoryPage from "./components/pages/user/PurchaseHistoryPage";
-import WelcomePage from "./components/pages/user/WelcomePage"; // ✅ เพิ่มตรงนี้
+import WelcomePage from "./components/pages/user/WelcomePage"; 
+
 
 // Auth Pages
 import Register from "./components/pages/auth/Register";

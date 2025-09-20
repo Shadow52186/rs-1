@@ -51,10 +51,10 @@ router.get("/product", async (req, res) => {
   }
 });
 
-// ✅ ดึงสินค้าที่แนะนำ
+// ดึงสินค้าที่แนะนำ
 router.get("/product/featured", async (req, res) => {
   try {
-    const products = await Product.find({ isFeatured: true }).limit(6).sort({ createdAt: -1 });
+    const products = await Product.find({ isFeatured: true }).limit(3).sort({ createdAt: -1 });
     res.json(products);
   } catch (err) {
     console.error("โหลดสินค้าแนะนำล้มเหลว:", err);
@@ -62,7 +62,7 @@ router.get("/product/featured", async (req, res) => {
   }
 });
 
-// ✅ อัปโหลดสินค้า
+// อัปโหลดสินค้า
 router.post("/product/upload", uploadProduct, uploadProductHandler);
 
 // ✅ แก้ไขสินค้า
@@ -88,6 +88,7 @@ router.delete("/stock/:id", async (req, res) => {
     return res.status(400).send("รหัสสต็อกไม่ถูกต้อง");
   }
   return deleteStock(req, res);
+  z
 });
 
 // ✅ ซื้อสินค้า

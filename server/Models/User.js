@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: 3,
       maxlength: 30,
-      match: /^[a-zA-Z0-9_]+$/, // ✅ ป้องกัน injection เช่นใส่ JSON
+      match: /^[a-zA-Z0-9_]+$/, 
       unique: true,
     },
     password: {
@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ Index เพื่อความเร็วในการค้นหา username และป้องกันซ้ำ
+
 userSchema.index({ username: 1 }, { unique: true });
 
 module.exports = mongoose.model('User', userSchema);
